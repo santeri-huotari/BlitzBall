@@ -41,4 +41,12 @@ public class PlayerController : MonoBehaviour
     {
         rb.AddForce(Vector3.up * jumpStrenght, ForceMode.Impulse);
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Danger")
+        {
+            gameObject.SetActive(false);
+        }
+    }
 }
