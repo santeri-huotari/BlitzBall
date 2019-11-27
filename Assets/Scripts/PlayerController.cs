@@ -9,11 +9,20 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float jumpStrenght = 5f;
 
+    [SerializeField]
+    AudioClip hitSound;
+    [SerializeField]
+    AudioClip jumpSound;
+
+    [SerializeField]
+    GameObject DeathEffect;
+
     public int health;
     public int maxHealth = 3;
 
     private Rigidbody rb;
     private GameManager gameManager;
+    private AudioSource audioSource;
 
     // Start is called before the first frame update
     void Start()
@@ -21,6 +30,7 @@ public class PlayerController : MonoBehaviour
         health = maxHealth;
         rb = gameObject.GetComponent<Rigidbody>();
         gameManager = GameObject.FindGameObjectWithTag("GameController").GetComponent<GameManager>();
+        audioSource = gameObject.GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -57,6 +67,7 @@ public class PlayerController : MonoBehaviour
         if (hit.collider)
         {
             rb.AddForce(Vector3.up * jumpStrenght, ForceMode.Impulse);
+            audioSource.PlayOneShot(jumpSound);
         }
     }
 
@@ -67,10 +78,12 @@ public class PlayerController : MonoBehaviour
             if (health > 1)
             {
                 health--;
+                audioSource.PlayOneShot(hitSound);
             }
             else
             {
                 health--;
+                Instantiate(DeathEffect, transform.position, Quaternion.identity);
                 gameManager.GameOver();
             }
 
@@ -81,10 +94,19 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.tag == "SpeedBoost")
+        {
+            rb.AddForce(other.transform.forward * 20f, ForceMode.VelocityChange);
+        }
+    }
+
     private void CheckBounds()
     {
         if (transform.position.y < -3f)
         {
+            Instantiate(DeathEffect, transform.position, Quaternion.identity);
             gameManager.GameOver();
         }
     }

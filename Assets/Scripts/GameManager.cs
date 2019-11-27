@@ -12,6 +12,9 @@ public class GameManager : MonoBehaviour
 
     private Text timerText;
     private Text healthText;
+    private Text bestTimeText;
+    private GameObject newRecordObject;
+    private GameObject demoOverObject;
     private GameObject player;
     private GameObject victoryMenu;
     private GameObject pauseMenu;
@@ -43,11 +46,15 @@ public class GameManager : MonoBehaviour
         {
             timerText = GameObject.Find("TimerText").GetComponent<Text>();
             healthText = GameObject.Find("HealthText").GetComponent<Text>();
+            bestTimeText = GameObject.Find("BestTimeText").GetComponent<Text>();
             player = GameObject.FindGameObjectWithTag("Player");
             victoryMenu = GameObject.Find("VictoryPanel");
             pauseMenu = GameObject.Find("PausePanel");
             gameoverMenu = GameObject.Find("GameOverPanel");
+            newRecordObject = GameObject.Find("NewBestTime");
+            demoOverObject = GameObject.Find("DemoOverText");
 
+            demoOverObject.SetActive(false);
             victoryMenu.SetActive(false);
             pauseMenu.SetActive(false);
             gameoverMenu.SetActive(false);
@@ -65,9 +72,37 @@ public class GameManager : MonoBehaviour
             UpdateUI();
         }
 
-        if (Input.GetButtonDown("Cancel") && currentScene.buildIndex > 1 && Time.timeScale != 0)
+        if (Input.GetButtonDown("Cancel") && currentScene.buildIndex > 1 && Time.timeScale != 0 && player.activeSelf)
         {
             TogglePause();
+        }
+    }
+
+    /// <summary>
+    /// Gets the best time of the current level from playerprefs
+    /// </summary>
+    /// <returns></returns>
+    private float GetBestTime()
+    {
+        if (!PlayerPrefs.HasKey("besttime" + currentScene.buildIndex))
+        {
+            PlayerPrefs.SetFloat("besttime" + currentScene.buildIndex, 99999999f);
+        }
+
+        return PlayerPrefs.GetFloat("besttime" + currentScene.buildIndex);
+    }
+
+    /// <summary>
+    /// Saves value to playerprefs as best time IF it is better than current one
+    /// </summary>
+    /// <param name="value"></param>
+    private void SetBestTime(float value)
+    {
+        if (value < PlayerPrefs.GetFloat("besttime" + currentScene.buildIndex))
+        {
+            PlayerPrefs.SetFloat("besttime" + currentScene.buildIndex, value);
+
+            PlayerPrefs.Save();
         }
     }
 
@@ -85,6 +120,18 @@ public class GameManager : MonoBehaviour
     {
         Time.timeScale = 0f;
         victoryMenu.SetActive(true);
+
+        if (time < GetBestTime())
+        {
+            newRecordObject.SetActive(true);
+        }
+        else
+        {
+            newRecordObject.SetActive(false);
+        }
+        SetBestTime(time);
+        bestTimeText.text = "Best time: " + GetBestTime();
+
     }
 
     public void StartGame()
@@ -95,8 +142,17 @@ public class GameManager : MonoBehaviour
 
     public void NextLevel()
     {
-        Time.timeScale = 1f;
-        SceneManager.LoadScene(currentScene.buildIndex + 1);
+        if (currentScene.buildIndex < SceneManager.sceneCountInBuildSettings - 1)
+        {
+            Time.timeScale = 1f;
+            SceneManager.LoadScene(currentScene.buildIndex + 1);
+        }
+        else
+        {
+            TogglePause();
+            victoryMenu.SetActive(false);
+            demoOverObject.SetActive(true);
+        }
     }
 
     public void ToMenu()
@@ -131,7 +187,7 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
-        Time.timeScale = 0f;
+        player.SetActive(false);
         gameoverMenu.SetActive(true);
     }
 }
