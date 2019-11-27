@@ -26,11 +26,14 @@ public class PlayerController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        CheckBounds();
-        Movement();
-        if (Input.GetButtonDown("Jump"))
+        if (Time.timeScale != 0)
         {
-            Jump();
+            CheckBounds();
+            Movement();
+            if (Input.GetButtonDown("Jump"))
+            {
+                Jump();
+            }
         }
     }
 
@@ -68,7 +71,7 @@ public class PlayerController : MonoBehaviour
             else
             {
                 health--;
-                gameObject.SetActive(false);
+                gameManager.GameOver();
             }
 
         }
@@ -82,7 +85,7 @@ public class PlayerController : MonoBehaviour
     {
         if (transform.position.y < -3f)
         {
-            gameObject.SetActive(false);
+            gameManager.GameOver();
         }
     }
 }

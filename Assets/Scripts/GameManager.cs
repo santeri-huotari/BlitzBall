@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     private GameObject player;
     private GameObject victoryMenu;
     private GameObject pauseMenu;
+    private GameObject gameoverMenu;
 
     private Scene currentScene;
 
@@ -45,11 +46,14 @@ public class GameManager : MonoBehaviour
             player = GameObject.FindGameObjectWithTag("Player");
             victoryMenu = GameObject.Find("VictoryPanel");
             pauseMenu = GameObject.Find("PausePanel");
+            gameoverMenu = GameObject.Find("GameOverPanel");
 
             victoryMenu.SetActive(false);
             pauseMenu.SetActive(false);
+            gameoverMenu.SetActive(false);
 
             time = 0f;
+            Time.timeScale = 1f;
         }
     }
 
@@ -61,7 +65,7 @@ public class GameManager : MonoBehaviour
             UpdateUI();
         }
 
-        if (Input.GetButtonDown("Cancel") && currentScene.buildIndex > 1)
+        if (Input.GetButtonDown("Cancel") && currentScene.buildIndex > 1 && Time.timeScale != 0)
         {
             TogglePause();
         }
@@ -105,6 +109,12 @@ public class GameManager : MonoBehaviour
         Application.Quit();
     }
 
+    public void RestartLevel()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(currentScene.buildIndex);
+    }
+
     public void TogglePause()
     {
         if (Time.timeScale == 1f)
@@ -117,5 +127,11 @@ public class GameManager : MonoBehaviour
             Time.timeScale = 1f;
             pauseMenu.SetActive(false);
         }
+    }
+
+    public void GameOver()
+    {
+        Time.timeScale = 0f;
+        gameoverMenu.SetActive(true);
     }
 }

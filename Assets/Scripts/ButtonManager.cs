@@ -44,4 +44,14 @@ public class ButtonManager : MonoBehaviour
     {
         gm.TogglePause();
     }
+
+    public void GameOver()
+    {
+        gm.GameOver();
+    }
+
+    public void RestartLevel()
+    {
+        gm.RestartLevel();
+    }
 }
